@@ -1,0 +1,11 @@
+django
+csv
+requests
+json
+pandas
+wordcloud
+pickle
+jieba
+xlrd
+sklearn
+re

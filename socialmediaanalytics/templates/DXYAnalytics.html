@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html language="zh-cn">
+  <head>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <link href="/static/css/style.css" rel="stylesheet" type="text/css" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>疫情数据列表_襄阳</title>
+    <script type="text/javascript">
+      function next(){
+        var page = Number($("#page").val())+Number(1);
+        f1.page.value=page;
+        var formdom = document.getElementById('f1');
+        formdom.submit();
+      }
+      function prev(){
+        var page = $("#page").val()-1;
+        f1.page.value=page;
+        f1.submit();
+      }
+    </script>
+  </head>
+  <body>
+    <h1>
+      {{ message }}&emsp;第{{ page }}页&emsp;
+      <button type="button" onclick="prev()">prev</button>&emsp;
+      <button type="button" onclick="next()">next</button>&emsp;
+    </h1> 
+    <form action="" id="f1">
+      To page:
+      <input type="int" name="page" id='page' value={{ page }}>
+      <input type="submit" value="Submit">
+    </form>
+    <table>
+      <thead>
+        {% for i in epidemic_list %}
+        <tr>
+          <td><p>当前确诊数量：{{ i.currentConfirmedCount }}</p></td>
+          <td><p>累积确诊数量：{{ i.confirmedCount }}</p></td>
+          <td><p>累积治愈数量：{{ i.curedCount }}</p></td>
+          <td><p>累积死亡数量：{{ i.deadCount }}</p></td>
+          <td><p>更新时间：{{ i.updateTime }}</p></td>
+        </tr>
+        {% endfor %}
+      </thead>
+    </table>
+  </body>  
+</html>

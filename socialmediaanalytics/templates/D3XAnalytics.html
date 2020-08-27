@@ -1,0 +1,173 @@
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>  
+            <meta charset="utf-8">  
+            <title>疫情数据可视化</title>  
+      </head> 
+    <style>
+     
+    </style>
+    <body>
+        
+        <table hidden="hidden" id="myTable">
+            <tr>
+                <td>省份</td>
+                <td>累计数量</td>
+            </tr>
+            {% for i in china_list %}
+            <tr>
+                <td><div class="provinceName">{{i.provinceName}}</div></td>
+                <td><div class="confirmedCount">{{i.confirmedCount}}</div></td>
+            </tr>
+            {% endfor %} 
+        </table>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script>
+	var width  = 1000; // 全局变量宽度
+	var height = 1000; // 全局变量高度
+	
+	var svg = d3.select("body").append("svg") // 创建一个画布，将该画布元素添加到body元素里
+	    .attr("width", width)  // 设置画布的宽度
+	    .attr("height", height) // 设置画布的高度
+	    .append("g")  // 添加一个元素g
+	    .attr("transform", "translate(0,0)"); // 添加一个属性到元素g
+	
+	var projection = d3.geo.mercator()     // 创建一个地图投影
+						.center([107, 31]) // 设置地图的中心位置
+						.scale(850)        // 设定放大的比例
+    					.translate([width/2, height/2]);  // 用于设定平移
+	
+	//创建一个地理路径生成器
+	var path = d3.geo.path().projection(projection); //设置地理路径生成器的投影方式
+	
+	//新建一个颜色比例尺
+	var color = d3.scale.category20();
+    //console.log(color(1));
+    //console.log(color.length);
+
+    var red = d3.rgb(255,0,0);
+	var green = d3.rgb(0,255,0);
+    var compute = d3.interpolate(red,green);
+    //console.log(compute(0.5));
+    /*
+    var List={{ List|safe }};
+    console.log(List);
+    for (var i = List.length - 1; i >= 0; i--) {
+        console.log(List[i]);
+    }
+    */
+    //table = document.getElementById("myTable");
+    //tr = table.getElementsByTagName("tr");
+    //console.log(table);
+    //console.log(tr);
+    //province = document.getElementById("provinceName");
+    //console.log(province);
+    //console.log(province[1]);
+    var province =document.getElementsByClassName("provinceName");
+    var confirmed =document.getElementsByClassName("confirmedCount");
+    //console.log(province[1].innerHTML);
+    //console.log(confirmed[1].innerHTML);
+    //console.log(confirmed.length);
+
+
+	// 读取中国地图的json文件并绘图
+    d3.json("http://localhost:8000/json/china.json", function(error, data) {
+	//d3.json("http://localhost/d3/china.json", function(error, data) {
+		
+		if (error) 
+			return console.error(error);
+		//console.log(data.features);
+		
+		// 绘制地图
+		svg.selectAll("path")
+			.data( data.features )
+			.enter()
+			.append("path")
+			.attr("stroke","#000")
+			.attr("stroke-width",1)
+			.attr("fill", function(d,i){
+                //console.log(i);
+                //console.log(d.properties.name);
+                /*
+                {% for z in china_list %}
+                if (d.properties.name == z.provinceName) {
+                    j = i.confirmedCount;
+                    if (j>2000) {
+                        j = 2000;
+                    }
+                }
+                {% endfor %} 
+                */
+                var j =0;
+                for (var z =0; z < confirmed.length; z++) {
+                    //console.log(z);
+                    //console.log(province[z].innerHTML);
+                    if (d.properties.name == province[z].innerHTML) {
+
+                        console.log(confirmed[z].innerHTML);
+                        j=confirmed[z].innerHTML;
+                    }
+                    if (j>1000) {
+                        j=1000;
+                    }
+                }
+                j=1-j/1000;
+				return compute(j);
+			})
+			.attr("d", path )
+			.on("mouseover",function(d,i){
+                d3.select(this)
+                    .attr("fill","yellow");
+            })
+            .on("mouseout",function(d,i){
+                var j =0;
+                for (var z =0; z < confirmed.length; z++) {
+                    //console.log(z);
+                    //console.log(province[z].innerHTML);
+                    if (d.properties.name == province[z].innerHTML) {
+
+                        console.log(confirmed[z].innerHTML);
+                        j=confirmed[z].innerHTML;
+                    }
+                    if (j>1000) {
+                        j=1000;
+                    }
+                }
+                j=1-j/1000;
+                d3.select(this)
+                    .attr("fill",compute(j));
+            });
+
+        //绘制文字
+        svg.append('g')
+            .selectAll('text')
+            .data(data.features)
+            .enter()
+            .append('text')
+            .attr('font-size',12)
+            .attr('text-anchor', 'middle')
+            .attr('x',function (d,i) {
+                var position = projection(d.properties.centroid || [0,0]);
+                return position[0];
+            })
+            .attr('y',function (d,i) {
+                var position = projection(d.properties.centroid || [0,0]);
+                return position[1];
+            })
+            .attr('dy',function (d,i) {
+               //澳门和香港重合了，挤到一起了，需要添加特殊处理
+               // if (d.properties.name === '澳门特别行政区') {
+               //     return 10;
+               // }
+            })
+            .text(function (d,i) {
+               return d.properties.name;
+            });
+		
+	});
+ 
+</script>
+    	
+    </body>  
+    </html>  
